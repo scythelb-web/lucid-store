@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucid Vinyl — Custom Stickers, Decals & Vehicle Graphics</title>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --border: #1e1e2e;
+            --text: #e0e0e8;
+            --muted: #6b6b80;
+            --accent: #a78bfa;
+            --accent-glow: rgba(167, 139, 250, 0.15);
+            --success: #34d399;
+            --danger: #f87171;
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 2rem;
+        }
+        .header .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #a78bfa 0%, #818cf8 50%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .tagline {
+            color: var(--muted);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        /* Product Type Selector */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+        .product-option {
+            position: relative;
+        }
+        .product-option input { display: none; }
+        .product-option label {
+            display: block;
+            padding: 1rem;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        .product-option input:checked + label {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+        .product-option label:hover {
+            border-color: var(--accent);
+        }
+        .product-icon { font-size: 1.5rem; display: block; margin-bottom: 0.25rem; }
+        .product-min { font-size: 0.7rem; color: var(--muted); margin-top: 0.25rem; }
+
+        /* Form fields */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+        .form-row.full { grid-template-columns: 1fr; }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--muted);
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-group select:focus, .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .form-group select { appearance: none; cursor: pointer; }
+
+        /* Price display */
+        .price-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.35rem 0;
+            font-size: 0.9rem;
+        }
+        .price-row.muted { color: var(--muted); }
+        .price-row.total {
+            border-top: 1px solid var(--border);
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .price-row .unit { color: var(--muted); font-size: 0.8rem; }
+        .price-row.error { color: var(--danger); }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.85rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #a78bfa, #818cf8);
+            color: #0a0a0f;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading state */
+        .quote-loading { display: none; color: var(--muted); text-align: center; padding: 0.5rem; }
+        .quote-loading.active { display: block; }
+
+        /* Error */
+        .error-msg {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .error-msg.active { display: block; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.8rem;
+            padding: 2rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .form-row.three { grid-template-columns: 1fr; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .header .logo { font-size: 1.8rem; }
+            .container { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Lucid Vinyl</div>
+            <div class="tagline">Custom stickers, decals & vehicle graphics — designed by you, printed by pros</div>
+        </div>
+
+        <!-- Step 1: Product Type -->
+        <div class="card">
+            <h2>1. What are you ordering?</h2>
+            <div class="product-grid">
+                {% for key, prod in product_types.items() %}
+                <div class="product-option">
+                    <input type="radio" name="product_type" value="{{ key }}" id="prod_{{ key }}"
+                           {% if key == 'stickers' %}checked{% endif %}
+                           data-min="{{ prod.min_qty }}">
+                    <label for="prod_{{ key }}">
+                        <span class="product-icon">
+                            {% if key == 'stickers' %}🎨
+                            {% elif key == 'decals' %}✨
+                            {% elif key == 'labels' %}🏷️
+                            {% elif key == 'vehicle_graphics' %}🚛
+                            {% else %}📐{% endif %}
+                        </span>
+                        {{ prod.name }}
+                        <span class="product-min">Min {{ prod.min_qty }}+</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Step 2: Specs -->
+        <div class="card">
+            <h2>2. Size & Quantity</h2>
+            <div class="form-row three">
+                <div class="form-group">
+                    <label>Width (inches)</label>
+                    <input type="number" id="width" value="3" min="1" max="120" step="0.25">
+                </div>
+                <div class="form-group">
+                    <label>Height (inches)</label>
+                    <input type="number" id="height" value="3" min="1" max="120" step="0.25">
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" id="quantity" value="50" min="1" max="10000">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Material</label>
+                    <select id="material">
+                        {% for key, mat in materials.items() %}
+                        <option value="{{ key }}" {% if key == 'premium_vinyl' %}selected{% endif %}>
+                            {{ mat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Finish</label>
+                    <select id="finish">
+                        {% for key, fin in finishes.items() %}
+                        <option value="{{ key }}" {% if key == 'laminated_gloss' %}selected{% endif %}>
+                            {{ fin.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Price -->
+        <div class="card">
+            <h2>3. Your Quote</h2>
+            <div class="price-box" id="price-display">
+                <div class="price-row muted">
+                    <span>Select specs to see pricing</span>
+                    <span>—</span>
+                </div>
+            </div>
+
+            <div class="quote-loading" id="quote-loading">Calculating…</div>
+            <div class="error-msg" id="quote-error"></div>
+        </div>
+
+        <!-- Step 4: Checkout -->
+        <div class="card">
+            <h2>4. Checkout</h2>
+            <form id="checkout-form" action="/api/create-checkout" method="POST">
+                <input type="hidden" name="product_type" id="hidden_product_type" value="stickers">
+                <input type="hidden" name="width" id="hidden_width">
+                <input type="hidden" name="height" id="hidden_height">
+                <input type="hidden" name="quantity" id="hidden_quantity">
+                <input type="hidden" name="material" id="hidden_material">
+                <input type="hidden" name="finish" id="hidden_finish">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" name="customer_name" placeholder="Jane Smith">
+                    </div>
+                    <div class="form-group">
+                        <label>Email (required)</label>
+                        <input type="email" name="customer_email" required placeholder="you@example.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Special Instructions / Notes</label>
+                    <input type="text" name="notes" placeholder="e.g., artwork file will be emailed separately, specific color preferences...">
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="checkout-btn" disabled>
+                    Proceed to Payment →
+                </button>
+            </form>
+        </div>
+
+        <div class="footer">
+            <p>Powered by <strong>Lucid Vinyl</strong> — Langley, BC · 3M Certified · Professional installs available</p>
+            <p style="margin-top:0.5rem">Questions? <a href="mailto:sales@lucidvinyl.com" style="color:var(--accent)">sales@lucidvinyl.com</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const productInputs = document.querySelectorAll('input[name="product_type"]');
+        const widthInput = document.getElementById('width');
+        const heightInput = document.getElementById('height');
+        const quantityInput = document.getElementById('quantity');
+        const materialSelect = document.getElementById('material');
+        const finishSelect = document.getElementById('finish');
+        const priceDisplay = document.getElementById('price-display');
+        const quoteLoading = document.getElementById('quote-loading');
+        const quoteError = document.getElementById('quote-error');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const checkoutForm = document.getElementById('checkout-form');
+
+        let debounceTimer;
+
+        function getSpecs() {
+            const checked = document.querySelector('input[name="product_type"]:checked');
+            return {
+                product_type: checked ? checked.value : 'stickers',
+                width: parseFloat(widthInput.value) || 0,
+                height: parseFloat(heightInput.value) || 0,
+                quantity: parseInt(quantityInput.value) || 0,
+                material: materialSelect.value,
+                finish: finishSelect.value,
+            };
+        }
+
+        function formatUSD(cents) {
+            return '$' + (cents / 100).toFixed(2);
+        }
+
+        async function fetchQuote() {
+            const specs = getSpecs();
+            if (specs.width <= 0 || specs.height <= 0 || specs.quantity <= 0) return;
+
+            quoteLoading.classList.add('active');
+            quoteError.classList.remove('active');
+            checkoutBtn.disabled = true;
+
+            const formData = new FormData();
+            for (const [k, v] of Object.entries(specs)) formData.append(k, v);
+
+            try {
+                const resp = await fetch('/api/quote', { method: 'POST', body: formData });
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    priceDisplay.innerHTML = `<div class="price-row error">${data.error || 'Unable to calculate price'}</div>`;
+                    quoteError.textContent = data.error || 'Check your specs and try again.';
+                    quoteError.classList.add('active');
+                    checkoutBtn.disabled = true;
+                } else {
+                    priceDisplay.innerHTML = `
+                        <div class="price-row muted">
+                            <span>${specs.quantity} units · ${data.sqft_per_unit} sq ft each · ${data.total_sqft} sq ft total</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Unit price</span>
+                            <span>${formatUSD(data.unit_price_cents)} <span class="unit">/unit</span></span>
+                        </div>
+                        <div class="price-row muted">
+                            <span>Materials & setup</span>
+                            <span>${formatUSD(data.material_cost_cents + data.setup_fee_cents)}</span>
+                        </div>
+                        <div class="price-row muted">
+                            <span>Shipping</span>
+                            <span>${formatUSD(data.shipping_cents)}</span>
+                        </div>
+                        <div class="price-row total">
+                            <span>Total</span>
+                            <span>${formatUSD(data.total_cents)}</span>
+                        </div>
+                    `;
+                    checkoutBtn.disabled = false;
+                    quoteError.classList.remove('active');
+
+                    // Update hidden form fields
+                    document.getElementById('hidden_product_type').value = specs.product_type;
+                    document.getElementById('hidden_width').value = specs.width;
+                    document.getElementById('hidden_height').value = specs.height;
+                    document.getElementById('hidden_quantity').value = specs.quantity;
+                    document.getElementById('hidden_material').value = specs.material;
+                    document.getElementById('hidden_finish').value = specs.finish;
+                }
+            } catch (e) {
+                quoteError.textContent = 'Network error. Check your connection.';
+                quoteError.classList.add('active');
+            } finally {
+                quoteLoading.classList.remove('active');
+            }
+        }
+
+        function updateMinQty() {
+            const checked = document.querySelector('input[name="product_type"]:checked');
+            if (checked) {
+                const min = parseInt(checked.dataset.min) || 1;
+                quantityInput.min = min;
+                if (parseInt(quantityInput.value) < min) {
+                    quantityInput.value = min;
+                }
+            }
+            fetchQuote();
+        }
+
+        // Event listeners
+        productInputs.forEach(el => el.addEventListener('change', updateMinQty));
+        [widthInput, heightInput, quantityInput, materialSelect, finishSelect].forEach(el => {
+            el.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fetchQuote, 300);
+            });
+        });
+
+        // Initial quote
+        updateMinQty();
+    </script>
+</body>
+</html>

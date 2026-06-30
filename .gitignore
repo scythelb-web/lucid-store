@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+orders.db
+.env
+*.egg-info/
