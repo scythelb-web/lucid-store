@@ -4,7 +4,6 @@ import uuid
 import aiosqlite
 import httpx
 from pathlib import Path
-from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -213,18 +212,11 @@ _db_initialized = False
 async def home(request: Request):
     global _db_initialized
     if not _db_initialized:
-        try:
-            await init_db()
-            _db_initialized = True
-        except Exception as e:
-            return HTMLResponse(f"<h1>DB Error</h1><pre>{e}</pre>", status_code=500)
-    try:
-        return render_template("index.html", request=request,
-            materials=MATERIALS, finishes=FINISHES, product_types=PRODUCT_TYPES,
-            category_defaults=CATEGORY_DEFAULT_MATERIAL)
-    except Exception as e:
-        import traceback
-        return HTMLResponse(f"<h1>Template Error</h1><pre>{traceback.format_exc()}</pre>", status_code=500)
+        await init_db()
+        _db_initialized = True
+    return render_template("index.html", request=request,
+        materials=MATERIALS, finishes=FINISHES, product_types=PRODUCT_TYPES,
+        category_defaults=CATEGORY_DEFAULT_MATERIAL)
 
 
 @app.post("/api/quote")
