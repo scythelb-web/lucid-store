@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import stripe
 
-app = FastAPI(title="Lucid Vinyl Store")
+app = FastAPI(title="Lucid Store — Custom Signs, Decals & Stickers")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 jinja_env = Environment(
@@ -77,55 +77,102 @@ async def startup():
 # ── Pricing engine ───────────────────────────────────────────────────────
 
 MATERIALS = {
-    "standard_vinyl": {"name": "Standard Vinyl (3M 50-series)", "base_cents_per_sqft": 800},
-    "premium_vinyl": {"name": "Premium Vinyl (3M 1080/2080)", "base_cents_per_sqft": 1200},
-    "reflective": {"name": "Reflective Vinyl", "base_cents_per_sqft": 1500},
-    "clear": {"name": "Clear Vinyl", "base_cents_per_sqft": 900},
+    # ── Vinyl ──
+    "standard_vinyl":    {"name": "Standard Vinyl (3M 50-series)",   "base_cents_per_sqft": 800,  "category": "vinyl"},
+    "premium_vinyl":     {"name": "Premium Vinyl (3M 1080/2080)",   "base_cents_per_sqft": 1200, "category": "vinyl"},
+    "reflective":        {"name": "Reflective Vinyl",                "base_cents_per_sqft": 1500, "category": "vinyl"},
+    "clear":             {"name": "Clear Vinyl",                     "base_cents_per_sqft": 900,  "category": "vinyl"},
+    # ── Wood ──
+    "plywood_half":      {"name": '½" Birch Plywood',               "base_cents_per_sqft": 2500, "category": "wood"},
+    # ── Aluminum ──
+    "aluminum_040":      {"name": 'Aluminum 0.040" (standard)',     "base_cents_per_sqft": 2000, "category": "metal"},
+    "aluminum_060":      {"name": 'Aluminum 0.060" (heavy-duty)',   "base_cents_per_sqft": 2800, "category": "metal"},
+    # ── Coroplast (sandwich board inserts) ──
+    "coroplast":         {"name": "Coroplast (Corrugated Plastic)",  "base_cents_per_sqft": 500,  "category": "plastic"},
 }
 
 FINISHES = {
-    "gloss": {"name": "Gloss", "multiplier": 1.0},
-    "matte": {"name": "Matte", "multiplier": 1.0},
-    "laminated_gloss": {"name": "Laminated Gloss", "multiplier": 1.3},
-    "laminated_matte": {"name": "Laminated Matte", "multiplier": 1.3},
-    "contour_cut": {"name": "Contour Cut", "multiplier": 1.5},
+    "gloss":           {"name": "Gloss",                 "multiplier": 1.0},
+    "matte":           {"name": "Matte",                 "multiplier": 1.0},
+    "laminated_gloss": {"name": "Laminated Gloss",       "multiplier": 1.3},
+    "laminated_matte": {"name": "Laminated Matte",       "multiplier": 1.3},
+    "contour_cut":     {"name": "Contour Cut",           "multiplier": 1.5},
+    "natural":         {"name": "Natural (unfinished)",  "multiplier": 1.0},
+    "sealed":          {"name": "Clear-Sealed",          "multiplier": 1.15},
+    "painted":         {"name": "Painted Finish",        "multiplier": 1.3},
 }
 
 PRODUCT_TYPES = {
-    "stickers": {"name": "Custom Stickers", "min_qty": 50, "setup_fee_cents": 1500},
-    "decals": {"name": "Custom Decals", "min_qty": 10, "setup_fee_cents": 2000},
-    "labels": {"name": "Custom Labels", "min_qty": 50, "setup_fee_cents": 1500},
-    "vehicle_graphics": {"name": "Vehicle Graphics", "min_qty": 1, "setup_fee_cents": 3500},
-    "banners": {"name": "Banners & Signs", "min_qty": 1, "setup_fee_cents": 2500},
+    # ── Vinyl / Decals (sqft-based) ──
+    "stickers":         {"name": "Custom Stickers",       "min_qty": 50, "setup_fee_cents": 1500, "pricing": "sqft",   "category": "decals"},
+    "decals":           {"name": "Custom Decals",         "min_qty": 10, "setup_fee_cents": 2000, "pricing": "sqft",   "category": "decals"},
+    "car_decals":       {"name": "Car Decals",            "min_qty": 1,  "setup_fee_cents": 2000, "pricing": "sqft",   "category": "decals"},
+    "vehicle_graphics": {"name": "Vehicle Graphics",      "min_qty": 1,  "setup_fee_cents": 3500, "pricing": "sqft",   "category": "decals"},
+    # ── Sandwich Boards (unit-priced) ──
+    "sandwich_18x24":   {"name": 'Sandwich Board — 18×24"', "min_qty": 1, "base_price_cents": 13900, "pricing": "unit",  "category": "signage"},
+    "sandwich_24x36":   {"name": 'Sandwich Board — 24×36"', "min_qty": 1, "base_price_cents": 18900, "pricing": "unit",  "category": "signage"},
+    # ── Wood Signs (sqft-based) ──
+    "wood_sign":        {"name": "Custom Wood Sign",       "min_qty": 1,  "setup_fee_cents": 2500, "pricing": "sqft",   "category": "signage"},
+    # ── Aluminum Signs (sqft-based) ──
+    "aluminum_sign":    {"name": "Custom Aluminum Sign",   "min_qty": 1,  "setup_fee_cents": 2500, "pricing": "sqft",   "category": "signage"},
 }
 
-BASE_SHIPPING_CENTS = 1500  # $15 flat rate for now
+# Default materials per category (for the UI to pre-select)
+CATEGORY_DEFAULT_MATERIAL = {
+    "decals":  "premium_vinyl",
+    "signage": "plywood_half",
+}
+
+BASE_SHIPPING_CENTS = 1500  # $15 CAD flat rate
 
 
 def calculate_price(product_type: str, width: float, height: float,
                     quantity: int, material: str, finish: str) -> dict:
-    """Calculate price for a custom order based on specs."""
-    sqft = (width * height) / 144  # convert sq inches to sq ft
-    total_sqft = sqft * quantity
-
+    """Calculate price for a custom order. Two pricing models: unit (fixed per-item) and sqft (dimension-based)."""
+    prod = PRODUCT_TYPES.get(product_type, PRODUCT_TYPES["stickers"])
     mat = MATERIALS.get(material, MATERIALS["standard_vinyl"])
     fin = FINISHES.get(finish, FINISHES["gloss"])
-    prod = PRODUCT_TYPES.get(product_type, PRODUCT_TYPES["stickers"])
+    margin = 1.30  # 30% margin
 
-    # Material cost per unit
+    # ── Unit pricing (sandwich boards, pre-sized products) ──
+    if prod.get("pricing") == "unit":
+        unit_price = prod["base_price_cents"]
+        subtotal_cents = unit_price * quantity
+
+        # Volume discount
+        if quantity >= 10:
+            subtotal_cents = int(subtotal_cents * 0.85)
+        elif quantity >= 5:
+            subtotal_cents = int(subtotal_cents * 0.90)
+        elif quantity >= 3:
+            subtotal_cents = int(subtotal_cents * 0.95)
+
+        shipping_cents = BASE_SHIPPING_CENTS + (quantity - 1) * 800  # $15 + $8 each additional
+        total_cents = subtotal_cents + shipping_cents
+
+        return {
+            "unit_price_cents": unit_price,
+            "subtotal_cents": subtotal_cents,
+            "shipping_cents": shipping_cents,
+            "total_cents": total_cents,
+            "pricing_model": "unit",
+        }
+
+    # ── Sqft-based pricing (decals, wood signs, aluminum signs) ──
+    sqft = (width * height) / 144  # sq inches → sq ft
+    total_sqft = sqft * quantity
+
+    # Material cost
     material_cost_cents = int(total_sqft * mat["base_cents_per_sqft"] * fin["multiplier"])
 
-    # Setup fee (one-time)
-    setup_fee_cents = prod["setup_fee_cents"]
+    # Setup fee
+    setup_fee_cents = prod.get("setup_fee_cents", 0)
 
-    # Base subtotal
+    # Subtotal with margin
     base_subtotal = material_cost_cents + setup_fee_cents
+    subtotal_cents = int(base_subtotal * margin)
 
-    # Margin (30%)
-    margin_multiplier = 1.30
-    subtotal_cents = int(base_subtotal * margin_multiplier)
-
-    # Volume discount for bulk
+    # Volume discount
     if quantity >= 1000:
         subtotal_cents = int(subtotal_cents * 0.80)
     elif quantity >= 500:
@@ -135,7 +182,7 @@ def calculate_price(product_type: str, width: float, height: float,
     elif quantity >= 100:
         subtotal_cents = int(subtotal_cents * 0.95)
 
-    shipping_cents = BASE_SHIPPING_CENTS
+    shipping_cents = BASE_SHIPPING_CENTS + (quantity - 1) * 500
     total_cents = subtotal_cents + shipping_cents
 
     return {
@@ -147,6 +194,7 @@ def calculate_price(product_type: str, width: float, height: float,
         "subtotal_cents": subtotal_cents,
         "shipping_cents": shipping_cents,
         "total_cents": total_cents,
+        "pricing_model": "sqft",
     }
 
 
@@ -166,7 +214,8 @@ def render_template(name: str, request: Request = None, **context) -> HTMLRespon
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return render_template("index.html", request=request,
-        materials=MATERIALS, finishes=FINISHES, product_types=PRODUCT_TYPES)
+        materials=MATERIALS, finishes=FINISHES, product_types=PRODUCT_TYPES,
+        category_defaults=CATEGORY_DEFAULT_MATERIAL)
 
 
 @app.post("/api/quote")
@@ -190,7 +239,9 @@ async def get_quote(
         }, status_code=400)
 
     if width <= 0 or height <= 0:
-        raise HTTPException(400, "Dimensions must be positive")
+        prod = PRODUCT_TYPES.get(product_type, {})
+        if prod.get("pricing") != "unit":
+            raise HTTPException(400, "Dimensions must be positive")
 
     price = calculate_price(product_type, width, height, quantity, material, finish)
     return JSONResponse(price)
@@ -216,6 +267,9 @@ async def create_checkout(
     if quantity < prod["min_qty"]:
         raise HTTPException(400, f"Minimum {prod['min_qty']} units required")
 
+    if prod.get("pricing") != "unit" and (width <= 0 or height <= 0):
+        raise HTTPException(400, "Dimensions must be positive")
+
     price = calculate_price(product_type, width, height, quantity, material, finish)
     order_id = str(uuid.uuid4())[:8]
 
@@ -237,7 +291,7 @@ async def create_checkout(
         payment_method_types=["card"],
         line_items=[{
             "price_data": {
-                "currency": "usd",
+                "currency": "cad",
                 "product_data": {
                     "name": f"{prod['name']} — {quantity} units",
                     "description": f'{width}"×{height}", {MATERIALS[material]["name"]}, {FINISHES[finish]["name"]}',
