@@ -69,7 +69,15 @@ async def init_db():
 
 @app.on_event("startup")
 async def startup():
-    await init_db()
+    import sys
+    print("STARTUP: Beginning init...", flush=True)
+    try:
+        await init_db()
+        print("STARTUP: DB initialized", flush=True)
+    except Exception as e:
+        print(f"STARTUP ERROR (DB): {e}", flush=True)
+        raise
+    print("STARTUP: Complete", flush=True)
 
 
 # ── Pricing engine ───────────────────────────────────────────────────────
@@ -211,9 +219,14 @@ def render_template(name: str, request: Request = None, **context) -> HTMLRespon
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return render_template("index.html", request=request,
-        materials=MATERIALS, finishes=FINISHES, product_types=PRODUCT_TYPES,
-        category_defaults=CATEGORY_DEFAULT_MATERIAL)
+    try:
+        return render_template("index.html", request=request,
+            materials=MATERIALS, finishes=FINISHES, product_types=PRODUCT_TYPES,
+            category_defaults=CATEGORY_DEFAULT_MATERIAL)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return HTMLResponse(f"<h1>Error</h1><pre>{traceback.format_exc()}</pre>", status_code=500)
 
 
 @app.post("/api/quote")
