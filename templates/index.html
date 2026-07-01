@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucid Vinyl — Custom Stickers, Decals & Vehicle Graphics</title>
+    <title>Lucid Store — Custom Signs, Decals & Stickers | Langley, BC</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -12,14 +12,13 @@
             --text: #e0e0e8;
             --muted: #6b6b80;
             --accent: #a78bfa;
-            --accent-glow: rgba(167, 139, 250, 0.15);
+            --accent2: #818cf8;
+            --accent-glow: rgba(167, 139, 250, 0.12);
             --success: #34d399;
             --danger: #f87171;
             --radius: 12px;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             background: var(--bg);
             color: var(--text);
@@ -27,17 +26,16 @@
             line-height: 1.6;
             min-height: 100vh;
         }
+        .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-        .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
-
-        /* Header */
+        /* ── Header ── */
         .header {
             text-align: center;
-            margin-bottom: 3rem;
-            padding-top: 2rem;
+            margin-bottom: 1rem;
+            padding-top: 3rem;
         }
         .header .logo {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 800;
             letter-spacing: -0.03em;
             background: linear-gradient(135deg, #a78bfa 0%, #818cf8 50%, #c084fc 100%);
@@ -50,8 +48,77 @@
             font-size: 1.1rem;
             margin-top: 0.5rem;
         }
+        .header .location {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
 
-        /* Cards */
+        /* ── Product Grid ── */
+        .section-title {
+            text-align: center;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin: 2.5rem 0 1.5rem;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .product-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            position: relative;
+        }
+        .product-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+        .product-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .product-card .icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+        .product-card .name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+        .product-card .price {
+            color: var(--accent);
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .product-card .price-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+        .product-card .desc {
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ── Configurator Section ── */
+        .config-section { display: none; }
+        .config-section.active { display: block; }
+
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -60,44 +127,38 @@
             margin-bottom: 1.5rem;
         }
         .card h2 {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             color: var(--accent);
         }
 
-        /* Product Type Selector */
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 0.75rem;
+        .option-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
         }
-        .product-option {
+        .chip {
             position: relative;
         }
-        .product-option input { display: none; }
-        .product-option label {
-            display: block;
-            padding: 1rem;
+        .chip input { display: none; }
+        .chip label {
+            display: inline-block;
+            padding: 0.55rem 1rem;
             background: var(--bg);
             border: 2px solid var(--border);
-            border-radius: var(--radius);
-            text-align: center;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 0.88rem;
             transition: all 0.2s;
-            font-size: 0.9rem;
         }
-        .product-option input:checked + label {
+        .chip input:checked + label {
             border-color: var(--accent);
             background: var(--accent-glow);
         }
-        .product-option label:hover {
-            border-color: var(--accent);
-        }
-        .product-icon { font-size: 1.5rem; display: block; margin-bottom: 0.25rem; }
-        .product-min { font-size: 0.7rem; color: var(--muted); margin-top: 0.25rem; }
+        .chip label:hover { border-color: var(--accent); }
 
-        /* Form fields */
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -110,7 +171,7 @@
         .form-group { margin-bottom: 1rem; }
         .form-group label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: var(--muted);
             margin-bottom: 0.35rem;
@@ -119,7 +180,7 @@
         }
         .form-group select, .form-group input {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 0.7rem 1rem;
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -134,7 +195,15 @@
         }
         .form-group select { appearance: none; cursor: pointer; }
 
-        /* Price display */
+        .dim-hint {
+            display: none;
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 0.3rem;
+        }
+        .dim-hint.visible { display: block; }
+
+        /* Price box */
         .price-box {
             background: var(--bg);
             border: 1px solid var(--border);
@@ -159,7 +228,6 @@
         .price-row .unit { color: var(--muted); font-size: 0.8rem; }
         .price-row.error { color: var(--danger); }
 
-        /* Buttons */
         .btn {
             display: inline-block;
             padding: 0.85rem 2rem;
@@ -178,17 +246,10 @@
             color: #0a0a0f;
         }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-primary:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-        /* Loading state */
         .quote-loading { display: none; color: var(--muted); text-align: center; padding: 0.5rem; }
         .quote-loading.active { display: block; }
-
-        /* Error */
         .error-msg {
             background: rgba(248, 113, 113, 0.1);
             border: 1px solid var(--danger);
@@ -210,186 +271,323 @@
             border-top: 1px solid var(--border);
             margin-top: 3rem;
         }
+        .footer a { color: var(--accent); text-decoration: none; }
 
-        /* Mobile */
         @media (max-width: 600px) {
             .form-row { grid-template-columns: 1fr; }
             .form-row.three { grid-template-columns: 1fr; }
             .product-grid { grid-template-columns: repeat(2, 1fr); }
-            .header .logo { font-size: 1.8rem; }
+            .header .logo { font-size: 2rem; }
             .container { padding: 1rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- ── Header ── -->
         <div class="header">
-            <div class="logo">Lucid Vinyl</div>
-            <div class="tagline">Custom stickers, decals & vehicle graphics — designed by you, printed by pros</div>
+            <div class="logo">Lucid Store</div>
+            <div class="tagline">Custom signs, decals & stickers — printed in Langley, BC</div>
+            <div class="location">🍁 Fast local shipping across Canada</div>
         </div>
 
-        <!-- Step 1: Product Type -->
-        <div class="card">
-            <h2>1. What are you ordering?</h2>
-            <div class="product-grid">
-                {% for key, prod in product_types.items() %}
-                <div class="product-option">
-                    <input type="radio" name="product_type" value="{{ key }}" id="prod_{{ key }}"
-                           {% if key == 'stickers' %}checked{% endif %}
-                           data-min="{{ prod.min_qty }}">
-                    <label for="prod_{{ key }}">
-                        <span class="product-icon">
-                            {% if key == 'stickers' %}🎨
-                            {% elif key == 'decals' %}✨
-                            {% elif key == 'labels' %}🏷️
-                            {% elif key == 'vehicle_graphics' %}🚛
-                            {% else %}📐{% endif %}
-                        </span>
-                        {{ prod.name }}
-                        <span class="product-min">Min {{ prod.min_qty }}+</span>
-                    </label>
-                </div>
-                {% endfor %}
+        <!-- ── Category Cards ── -->
+        <div class="section-title">What are you looking for?</div>
+        <div class="product-grid" id="product-grid">
+            <!-- Car Decals -->
+            <div class="product-card" data-category="car_decals" onclick="selectCategory('car_decals')">
+                <span class="icon">🚗</span>
+                <div class="name">Car Decals & Stickers</div>
+                <div class="price">from $13</div>
+                <div class="price-label">CAD · custom sizes</div>
+                <div class="desc">Vinyl decals for cars, windows, bumpers. 3M vinyl, waterproof, UV-resistant.</div>
+            </div>
+
+            <!-- Sandwich Boards -->
+            <div class="product-card" data-category="sandwich_18x24" onclick="selectCategory('sandwich_18x24')">
+                <span class="icon">🪧</span>
+                <div class="name">Sandwich Board Signs</div>
+                <div class="price">from $139</div>
+                <div class="price-label">CAD · includes frame</div>
+                <div class="desc">A-frame sidewalk signs. Coroplast inserts, metal frame, double-sided printing.</div>
+            </div>
+
+            <!-- Wood Signs -->
+            <div class="product-card" data-category="wood_sign" onclick="selectCategory('wood_sign')">
+                <span class="icon">🪵</span>
+                <div class="name">Wood Signs</div>
+                <div class="price">from $75</div>
+                <div class="price-label">CAD · custom sizes</div>
+                <div class="desc">Birch plywood signs. UV-printed, natural or painted finish. Indoor & outdoor.</div>
+            </div>
+
+            <!-- Aluminum Signs -->
+            <div class="product-card" data-category="aluminum_sign" onclick="selectCategory('aluminum_sign')">
+                <span class="icon">🔩</span>
+                <div class="name">Aluminum Signs</div>
+                <div class="price">from $45</div>
+                <div class="price-label">CAD · custom sizes</div>
+                <div class="desc">Rust-proof aluminum signage. 10+ year outdoor life. Standard or heavy-duty.</div>
             </div>
         </div>
 
-        <!-- Step 2: Specs -->
-        <div class="card">
-            <h2>2. Size & Quantity</h2>
-            <div class="form-row three">
-                <div class="form-group">
-                    <label>Width (inches)</label>
-                    <input type="number" id="width" value="3" min="1" max="120" step="0.25">
-                </div>
-                <div class="form-group">
-                    <label>Height (inches)</label>
-                    <input type="number" id="height" value="3" min="1" max="120" step="0.25">
-                </div>
-                <div class="form-group">
-                    <label>Quantity</label>
-                    <input type="number" id="quantity" value="50" min="1" max="10000">
-                </div>
-            </div>
+        <!-- ── Configurator ── -->
+        <div class="config-section" id="config-section">
+            <div class="card">
+                <h2 id="config-title">Configure Your Order</h2>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Material</label>
-                    <select id="material">
-                        {% for key, mat in materials.items() %}
-                        <option value="{{ key }}" {% if key == 'premium_vinyl' %}selected{% endif %}>
-                            {{ mat.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                <!-- Sandwich board size selector -->
+                <div id="sandwich-size-select" style="display:none;">
+                    <div class="option-chips" id="sandwich-size-chips">
+                        <div class="chip">
+                            <input type="radio" name="sandwich_size" value="sandwich_18x24" id="sz_18x24" checked>
+                            <label for="sz_18x24">18×24" — $139</label>
+                        </div>
+                        <div class="chip">
+                            <input type="radio" name="sandwich_size" value="sandwich_24x36" id="sz_24x36">
+                            <label for="sz_24x36">24×36" — $189</label>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Finish</label>
-                    <select id="finish">
-                        {% for key, fin in finishes.items() %}
-                        <option value="{{ key }}" {% if key == 'laminated_gloss' %}selected{% endif %}>
-                            {{ fin.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
+
+                <!-- Dimensions (hidden for sandwich boards) -->
+                <div id="dimensions-section">
+                    <div class="form-row three">
+                        <div class="form-group">
+                            <label>Width (inches)</label>
+                            <input type="number" id="width" value="12" min="1" max="96" step="0.25">
+                        </div>
+                        <div class="form-group">
+                            <label>Height (inches)</label>
+                            <input type="number" id="height" value="18" min="1" max="96" step="0.25">
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="quantity" value="1" min="1" max="5000">
+                        </div>
+                    </div>
+                    <div class="dim-hint" id="dim-hint">Common sizes: car decal 12×6", wood sign 18×24", aluminum 12×18"</div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Step 3: Price -->
-        <div class="card">
-            <h2>3. Your Quote</h2>
-            <div class="price-box" id="price-display">
-                <div class="price-row muted">
-                    <span>Select specs to see pricing</span>
-                    <span>—</span>
-                </div>
-            </div>
-
-            <div class="quote-loading" id="quote-loading">Calculating…</div>
-            <div class="error-msg" id="quote-error"></div>
-        </div>
-
-        <!-- Step 4: Checkout -->
-        <div class="card">
-            <h2>4. Checkout</h2>
-            <form id="checkout-form" action="/api/create-checkout" method="POST">
-                <input type="hidden" name="product_type" id="hidden_product_type" value="stickers">
-                <input type="hidden" name="width" id="hidden_width">
-                <input type="hidden" name="height" id="hidden_height">
-                <input type="hidden" name="quantity" id="hidden_quantity">
-                <input type="hidden" name="material" id="hidden_material">
-                <input type="hidden" name="finish" id="hidden_finish">
-
+                <!-- Material selector -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Your Name</label>
-                        <input type="text" name="customer_name" placeholder="Jane Smith">
+                        <label>Material</label>
+                        <select id="material"></select>
                     </div>
                     <div class="form-group">
-                        <label>Email (required)</label>
-                        <input type="email" name="customer_email" required placeholder="you@example.com">
+                        <label>Finish</label>
+                        <select id="finish"></select>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Special Instructions / Notes</label>
-                    <input type="text" name="notes" placeholder="e.g., artwork file will be emailed separately, specific color preferences...">
+                <!-- Price -->
+                <div class="price-box" id="price-display">
+                    <div class="price-row muted">
+                        <span>Select options to see pricing</span>
+                        <span>—</span>
+                    </div>
                 </div>
+                <div class="quote-loading" id="quote-loading">Calculating…</div>
+                <div class="error-msg" id="quote-error"></div>
+            </div>
 
-                <button type="submit" class="btn btn-primary" id="checkout-btn" disabled>
-                    Proceed to Payment →
-                </button>
-            </form>
+            <!-- Checkout -->
+            <div class="card">
+                <h2>Checkout</h2>
+                <form id="checkout-form" action="/api/create-checkout" method="POST">
+                    <input type="hidden" name="product_type" id="hidden_product_type">
+                    <input type="hidden" name="width" id="hidden_width">
+                    <input type="hidden" name="height" id="hidden_height">
+                    <input type="hidden" name="quantity" id="hidden_quantity">
+                    <input type="hidden" name="material" id="hidden_material">
+                    <input type="hidden" name="finish" id="hidden_finish">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Your Name</label>
+                            <input type="text" name="customer_name" placeholder="Jane Smith">
+                        </div>
+                        <div class="form-group">
+                            <label>Email (required)</label>
+                            <input type="email" name="customer_email" required placeholder="you@example.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Special Instructions</label>
+                        <input type="text" name="notes" placeholder="e.g., artwork file emailed separately, color preferences...">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="checkout-btn" disabled>
+                        Proceed to Payment →
+                    </button>
+                </form>
+            </div>
         </div>
 
         <div class="footer">
-            <p>Powered by <strong>Lucid Vinyl</strong> — Langley, BC · 3M Certified · Professional installs available</p>
-            <p style="margin-top:0.5rem">Questions? <a href="mailto:sales@lucidvinyl.com" style="color:var(--accent)">sales@lucidvinyl.com</a></p>
+            <p><strong>Lucid Store</strong> — Langley, BC · Printed in Canada · Fast local shipping</p>
+            <p style="margin-top:0.5rem">Questions? <a href="mailto:sales@lucidvinyl.com">sales@lucidvinyl.com</a></p>
         </div>
     </div>
 
     <script>
-        // Elements
-        const productInputs = document.querySelectorAll('input[name="product_type"]');
+        // ── Category → product type mapping ──
+        const CATEGORY_MAP = {
+            car_decals: { type: "car_decals", category: "decals", icon: "🚗" },
+            sandwich_18x24: { type: "sandwich_18x24", category: "signage", icon: "🪧", is_sandwich: true },
+            sandwich_24x36: { type: "sandwich_24x36", category: "signage", icon: "🪧", is_sandwich: true },
+            wood_sign: { type: "wood_sign", category: "signage", icon: "🪵" },
+            aluminum_sign: { type: "aluminum_sign", category: "signage", icon: "🔩" },
+        };
+
+        // Context from server
+        const ALL_MATERIALS = {{ materials | tojson }};
+        const ALL_FINISHES = {{ finishes | tojson }};
+        const PRODUCT_TYPES = {{ product_types | tojson }};
+        const CATEGORY_DEFAULTS = {{ category_defaults | tojson }};
+
+        let currentProduct = null;
+        let debounceTimer;
+
+        // DOM refs
+        const configSection = document.getElementById('config-section');
+        const configTitle = document.getElementById('config-title');
+        const sandwichSizeSelect = document.getElementById('sandwich-size-select');
+        const dimensionsSection = document.getElementById('dimensions-section');
+        const dimHint = document.getElementById('dim-hint');
+        const materialSelect = document.getElementById('material');
+        const finishSelect = document.getElementById('finish');
         const widthInput = document.getElementById('width');
         const heightInput = document.getElementById('height');
         const quantityInput = document.getElementById('quantity');
-        const materialSelect = document.getElementById('material');
-        const finishSelect = document.getElementById('finish');
         const priceDisplay = document.getElementById('price-display');
         const quoteLoading = document.getElementById('quote-loading');
         const quoteError = document.getElementById('quote-error');
         const checkoutBtn = document.getElementById('checkout-btn');
-        const checkoutForm = document.getElementById('checkout-form');
 
-        let debounceTimer;
+        function selectCategory(key) {
+            currentProduct = CATEGORY_MAP[key];
+            if (!currentProduct) return;
 
-        function getSpecs() {
-            const checked = document.querySelector('input[name="product_type"]:checked');
-            return {
-                product_type: checked ? checked.value : 'stickers',
-                width: parseFloat(widthInput.value) || 0,
-                height: parseFloat(heightInput.value) || 0,
-                quantity: parseInt(quantityInput.value) || 0,
-                material: materialSelect.value,
-                finish: finishSelect.value,
-            };
+            // Highlight card
+            document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector(`[data-category="${key}"]`)?.classList.add('selected');
+
+            // Show configurator
+            configSection.classList.add('active');
+            configTitle.textContent = currentProduct.icon + ' Configure Your Order';
+
+            const prod = PRODUCT_TYPES[currentProduct.type];
+            if (!prod) return;
+
+            // Sandwich board mode
+            if (currentProduct.is_sandwich) {
+                sandwichSizeSelect.style.display = 'block';
+                dimensionsSection.style.display = 'none';
+
+                // Set sandwich size
+                const sz = document.querySelector('input[name="sandwich_size"]:checked');
+                if (sz) currentProduct = CATEGORY_MAP[sz.value];
+
+                // Update hidden fields for sandwich
+                const sprod = PRODUCT_TYPES[currentProduct.type];
+                document.getElementById('hidden_product_type').value = currentProduct.type;
+                document.getElementById('hidden_width').value = 0;
+                document.getElementById('hidden_height').value = 0;
+            } else {
+                sandwichSizeSelect.style.display = 'none';
+                dimensionsSection.style.display = 'block';
+
+                // Set dimension defaults per product
+                if (key === 'car_decals') {
+                    widthInput.value = 12; heightInput.value = 6;
+                } else if (key === 'wood_sign') {
+                    widthInput.value = 18; heightInput.value = 24;
+                } else if (key === 'aluminum_sign') {
+                    widthInput.value = 12; heightInput.value = 18;
+                }
+                dimHint.classList.add('visible');
+                quantityInput.value = prod.min_qty || 1;
+            }
+
+            // Populate materials for this category
+            populateMaterials(currentProduct.category);
+            updateMinQty();
+            fetchQuote();
         }
 
-        function formatUSD(cents) {
-            return '$' + (cents / 100).toFixed(2);
+        function populateMaterials(category) {
+            materialSelect.innerHTML = '';
+            const defaults = { decals: 'premium_vinyl', signage: 'plywood_half' };
+            const defaultMat = CATEGORY_DEFAULTS[category] || defaults[category] || 'premium_vinyl';
+
+            for (const [key, mat] of Object.entries(ALL_MATERIALS)) {
+                if (category === 'decals' && mat.category !== 'vinyl') continue;
+                if (category === 'signage' && mat.category === 'vinyl') continue;
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = mat.name;
+                if (key === defaultMat) opt.selected = true;
+                materialSelect.appendChild(opt);
+            }
+
+            // Populate finishes
+            finishSelect.innerHTML = '';
+            const finishList = category === 'decals'
+                ? ['gloss', 'matte', 'laminated_gloss', 'laminated_matte', 'contour_cut']
+                : ['natural', 'sealed', 'painted'];
+            for (const fk of finishList) {
+                const fin = ALL_FINISHES[fk];
+                if (!fin) continue;
+                const opt = document.createElement('option');
+                opt.value = fk;
+                opt.textContent = fin.name;
+                finishSelect.appendChild(opt);
+            }
+        }
+
+        function updateMinQty() {
+            if (!currentProduct) return;
+            const prod = PRODUCT_TYPES[currentProduct.type];
+            if (!prod) return;
+            quantityInput.min = prod.min_qty || 1;
+            if (parseInt(quantityInput.value) < (prod.min_qty || 1)) {
+                quantityInput.value = prod.min_qty || 1;
+            }
+        }
+
+        function formatCAD(cents) {
+            return '$' + (cents / 100).toFixed(2) + ' CAD';
         }
 
         async function fetchQuote() {
-            const specs = getSpecs();
-            if (specs.width <= 0 || specs.height <= 0 || specs.quantity <= 0) return;
+            if (!currentProduct) return;
+
+            let prodType = currentProduct.type;
+            let w = parseFloat(widthInput.value) || 0;
+            let h = parseFloat(heightInput.value) || 0;
+            let qty = parseInt(quantityInput.value) || 1;
+
+            // For sandwich boards, use selected size
+            if (currentProduct.is_sandwich) {
+                const sz = document.querySelector('input[name="sandwich_size"]:checked');
+                if (sz) prodType = sz.value;
+                w = 0; h = 0;
+            }
+
+            if (!currentProduct.is_sandwich && (w <= 0 || h <= 0)) return;
 
             quoteLoading.classList.add('active');
             quoteError.classList.remove('active');
             checkoutBtn.disabled = true;
 
             const formData = new FormData();
-            for (const [k, v] of Object.entries(specs)) formData.append(k, v);
+            formData.append('product_type', prodType);
+            formData.append('width', w);
+            formData.append('height', h);
+            formData.append('quantity', qty);
+            formData.append('material', materialSelect.value);
+            formData.append('finish', finishSelect.value);
 
             try {
                 const resp = await fetch('/api/quote', { method: 'POST', body: formData });
@@ -401,37 +599,34 @@
                     quoteError.classList.add('active');
                     checkoutBtn.disabled = true;
                 } else {
-                    priceDisplay.innerHTML = `
-                        <div class="price-row muted">
-                            <span>${specs.quantity} units · ${data.sqft_per_unit} sq ft each · ${data.total_sqft} sq ft total</span>
-                        </div>
-                        <div class="price-row">
-                            <span>Unit price</span>
-                            <span>${formatUSD(data.unit_price_cents)} <span class="unit">/unit</span></span>
-                        </div>
-                        <div class="price-row muted">
-                            <span>Materials & setup</span>
-                            <span>${formatUSD(data.material_cost_cents + data.setup_fee_cents)}</span>
-                        </div>
-                        <div class="price-row muted">
-                            <span>Shipping</span>
-                            <span>${formatUSD(data.shipping_cents)}</span>
-                        </div>
-                        <div class="price-row total">
-                            <span>Total</span>
-                            <span>${formatUSD(data.total_cents)}</span>
-                        </div>
-                    `;
+                    let html = '';
+                    if (data.pricing_model === 'unit') {
+                        html = `
+                            <div class="price-row muted"><span>${qty} unit${qty>1?'s':''}</span></div>
+                            <div class="price-row"><span>Unit price</span><span>${formatCAD(data.unit_price_cents)}</span></div>
+                            <div class="price-row muted"><span>Shipping</span><span>${formatCAD(data.shipping_cents)}</span></div>
+                            <div class="price-row total"><span>Total</span><span>${formatCAD(data.total_cents)}</span></div>
+                        `;
+                    } else {
+                        html = `
+                            <div class="price-row muted"><span>${qty} unit${qty>1?'s':''} · ${data.sqft_per_unit} sq ft each</span></div>
+                            <div class="price-row"><span>Unit price</span><span>${formatCAD(data.unit_price_cents)} <span class="unit">/unit</span></span></div>
+                            <div class="price-row muted"><span>Materials & setup</span><span>${formatCAD(data.material_cost_cents + data.setup_fee_cents)}</span></div>
+                            <div class="price-row muted"><span>Shipping</span><span>${formatCAD(data.shipping_cents)}</span></div>
+                            <div class="price-row total"><span>Total</span><span>${formatCAD(data.total_cents)}</span></div>
+                        `;
+                    }
+                    priceDisplay.innerHTML = html;
                     checkoutBtn.disabled = false;
                     quoteError.classList.remove('active');
 
                     // Update hidden form fields
-                    document.getElementById('hidden_product_type').value = specs.product_type;
-                    document.getElementById('hidden_width').value = specs.width;
-                    document.getElementById('hidden_height').value = specs.height;
-                    document.getElementById('hidden_quantity').value = specs.quantity;
-                    document.getElementById('hidden_material').value = specs.material;
-                    document.getElementById('hidden_finish').value = specs.finish;
+                    document.getElementById('hidden_product_type').value = prodType;
+                    document.getElementById('hidden_width').value = w;
+                    document.getElementById('hidden_height').value = h;
+                    document.getElementById('hidden_quantity').value = qty;
+                    document.getElementById('hidden_material').value = materialSelect.value;
+                    document.getElementById('hidden_finish').value = finishSelect.value;
                 }
             } catch (e) {
                 quoteError.textContent = 'Network error. Check your connection.';
@@ -441,20 +636,17 @@
             }
         }
 
-        function updateMinQty() {
-            const checked = document.querySelector('input[name="product_type"]:checked');
-            if (checked) {
-                const min = parseInt(checked.dataset.min) || 1;
-                quantityInput.min = min;
-                if (parseInt(quantityInput.value) < min) {
-                    quantityInput.value = min;
+        // Sandwich size change
+        document.querySelectorAll('input[name="sandwich_size"]').forEach(el => {
+            el.addEventListener('change', () => {
+                if (currentProduct && currentProduct.is_sandwich) {
+                    currentProduct = CATEGORY_MAP[el.value];
+                    fetchQuote();
                 }
-            }
-            fetchQuote();
-        }
+            });
+        });
 
-        // Event listeners
-        productInputs.forEach(el => el.addEventListener('change', updateMinQty));
+        // Dimension/quantity/material/finish changes
         [widthInput, heightInput, quantityInput, materialSelect, finishSelect].forEach(el => {
             el.addEventListener('input', () => {
                 clearTimeout(debounceTimer);
@@ -462,8 +654,8 @@
             });
         });
 
-        // Initial quote
-        updateMinQty();
+        // Default: show car decals
+        selectCategory('car_decals');
     </script>
 </body>
 </html>
