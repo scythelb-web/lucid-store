@@ -4,30 +4,12 @@ import uuid
 import aiosqlite
 import httpx
 from pathlib import Path
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import stripe
-
-app = FastAPI(title="Lucid Store — Custom Signs, Decals & Stickers")
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-jinja_env = Environment(
-    loader=FileSystemLoader(str(BASE_DIR / "templates")),
-    autoescape=select_autoescape(["html"]),
-)
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
-
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-LUCID_EMAIL = os.getenv("LUCID_EMAIL", "sales@lucidvinyl.com")
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
-DOMAIN = os.getenv("DOMAIN", "http://localhost:8000")
-DB_PATH = os.getenv("DB_PATH", str(BASE_DIR / "orders.db"))
-
-stripe.api_key = STRIPE_SECRET_KEY
-
 
 # ── Database ──────────────────────────────────────────────────────────────
 
@@ -69,9 +51,29 @@ async def init_db():
     await db.close()
 
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     await init_db()
+    yield
+
+
+app = FastAPI(title="Lucid Store — Custom Signs, Decals & Stickers", lifespan=lifespan)
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+jinja_env = Environment(
+    loader=FileSystemLoader(str(BASE_DIR / "templates")),
+    autoescape=select_autoescape(["html"]),
+)
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+LUCID_EMAIL = os.getenv("LUCID_EMAIL", "sales@lucidvinyl.com")
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
+DOMAIN = os.getenv("DOMAIN", "http://localhost:8000")
+DB_PATH = os.getenv("DB_PATH", str(BASE_DIR / "orders.db"))
+
+stripe.api_key = STRIPE_SECRET_KEY
 
 
 # ── Pricing engine ───────────────────────────────────────────────────────
