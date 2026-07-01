@@ -51,13 +51,7 @@ async def init_db():
     await db.close()
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await init_db()
-    yield
-
-
-app = FastAPI(title="Lucid Store — Custom Signs, Decals & Stickers", lifespan=lifespan)
+app = FastAPI(title="Lucid Store — Custom Signs, Decals & Stickers")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 jinja_env = Environment(
@@ -213,8 +207,14 @@ def render_template(name: str, request: Request = None, **context) -> HTMLRespon
 
 # ── Routes ────────────────────────────────────────────────────────────────
 
+_db_initialized = False
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    global _db_initialized
+    if not _db_initialized:
+        await init_db()
+        _db_initialized = True
     return render_template("index.html", request=request,
         materials=MATERIALS, finishes=FINISHES, product_types=PRODUCT_TYPES,
         category_defaults=CATEGORY_DEFAULT_MATERIAL)
