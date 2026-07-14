@@ -61,7 +61,7 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-LUCID_EMAIL = os.getenv("LUCID_EMAIL", "sales@lucidvinyl.com")
+LUCID_EMAIL = os.getenv("LUCID_EMAIL", "scythelb@gmail.com")
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
 DOMAIN = os.getenv("DOMAIN", "http://localhost:8000")
 DB_PATH = os.getenv("DB_PATH", str(BASE_DIR / "orders.db"))
