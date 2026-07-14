@@ -118,7 +118,19 @@ CATEGORY_DEFAULT_MATERIAL = {
     "signage": "plywood_half",
 }
 
-BASE_SHIPPING_CENTS = 1500  # $15 CAD flat rate
+BASE_SHIPPING_CENTS = 1500  # $15 CAD flat rate (fallback)
+
+# Category-specific shipping rates
+SHIPPING_RATES = {
+    "decals":   {"base": 500,  "per_item": 200},   # $5 + $2/item — envelope mail
+    "signage":  {"base": 1200, "per_item": 600},   # $12 + $6/item — bulky, needs box
+}
+
+
+def get_shipping(prod: dict, quantity: int) -> int:
+    """Get shipping cost based on product category and quantity."""
+    rate = SHIPPING_RATES.get(prod.get("category", ""), {"base": 1500, "per_item": 500})
+    return rate["base"] + (quantity - 1) * rate["per_item"]
 
 
 def calculate_price(product_type: str, width: float, height: float,
@@ -142,7 +154,7 @@ def calculate_price(product_type: str, width: float, height: float,
         elif quantity >= 3:
             subtotal_cents = int(subtotal_cents * 0.95)
 
-        shipping_cents = BASE_SHIPPING_CENTS + (quantity - 1) * 800  # $15 + $8 each additional
+        shipping_cents = get_shipping(prod, quantity)
         total_cents = subtotal_cents + shipping_cents
 
         return {
@@ -177,7 +189,7 @@ def calculate_price(product_type: str, width: float, height: float,
     elif quantity >= 100:
         subtotal_cents = int(subtotal_cents * 0.95)
 
-    shipping_cents = BASE_SHIPPING_CENTS + (quantity - 1) * 500
+    shipping_cents = get_shipping(prod, quantity)
     total_cents = subtotal_cents + shipping_cents
 
     return {
